@@ -1,24 +1,20 @@
+const { reflect } = require("async");
 const User = require("../models/User");
-const Agent = require("../models/Agent");
+// const Agent = require("../models/Agent");
+const ErrorResponse = require("../utils/errorResponse");
 
 exports.registerAgent = async (req, res, next) => {
 	const { username, email, password, rank } = req.body;
 	try {
-		const agent = await Agent.create({
+		const user = await User.create({
 			username,
 			email,
 			password,
 			rank,
 		});
-		res.status(201).json({
-			success: true,
-			agent,
-		});
+		sendToken(user, 201, res);
 	} catch (error) {
-		res.status(500).json({
-			success: false,
-			error: error.message,
-		});
+		next(error);
 	}
 };
 
@@ -31,32 +27,33 @@ exports.userSignUp = async (req, res, next) => {
 			password,
 			rank,
 		});
-		res.status(201).json({
-			success: true,
-			user,
-		});
+		sendToken(user, 201, res);
 	} catch (error) {
-		res.status(500).json({
-			success: false,
-			error: error.message,
-		});
+		next(error);
 	}
 };
 
-exports.userSignIn = (req, res, next) => {
-	res.send("Sign In User Route");
-};
+exports.userSignIn = async (req, res, next) => {
+	const { email, password } = req.body;
+	if (!email || !password) {
+		return next(new ErrorResponse("Please enter an email and password", 400));
+	}
 
-exports.userDetails = (req, res, next) => {
-	res.send("User Data Route");
-};
+	try {
+		const user = await User.findOne({ email }).select("+password");
+		if (!user) {
+			return next(new ErrorResponse("Invalid Credentials", 401));
+		}
+		const isMatch = await user.matchPasswords(password);
 
-exports.convertUserToAdmin = (req, res, next) => {
-	res.send("Convert User to Admin Route");
-};
+		if (!isMatch) {
+			return next(new ErrorResponse("Invalid Password", 401));
+		}
 
-exports.convertUserToAgent = (req, res, next) => {
-	res.send("Convert User to Agent Route");
+		sendToken(user, 200, res);
+	} catch (error) {
+		next(error);
+	}
 };
 
 exports.ConfirmEmail = (req, res, next) => {
@@ -97,4 +94,12 @@ exports.removeAdmin = (req, res, next) => {
 
 exports.removeAgent = (req, res, next) => {
 	res.send("Remove Agent Route");
+};
+
+const sendToken = (user, statusCode, res) => {
+	const token = user.getSignedToken();
+	res.status(statusCode).json({
+		success: true,
+		token,
+	});
 };
