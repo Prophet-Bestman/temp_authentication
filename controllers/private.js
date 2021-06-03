@@ -12,6 +12,7 @@ exports.userDetails = (req, res, next) => {
 	});
 };
 
+// ADMIN ACCESSS ONLY
 exports.convertUserToAdmin = (req, res, next) => {
 	res.status(200).json({
 		success: true,

@@ -30,9 +30,9 @@ app.use(express.json());
 // redirect all api/auth/... to the auth router
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/private/", require("./routes/private"));
-app.use("/api/User/details", require("./routes/private"));
-app.use("/api/Admin/convertUser", require("./routes/private"));
-app.use("/api/Agent/convertUser", require("./routes/private"));
+// app.use("/api/User/details", require("./routes/private"));
+// app.use("/api/Admin/convertUser", require("./routes/private"));
+// app.use("/api/Agent/convertUser", require("./routes/private"));
 
 // Error Handler (Has to be last piece of middleware)
 app.use(errorHandler);

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const UserSchema = new mongoose.Schema({
+const AdminSchema = new mongoose.Schema({
 	username: {
 		type: String,
 		required: [true, "Provide a username"],
@@ -30,8 +30,8 @@ const UserSchema = new mongoose.Schema({
 	},
 });
 
-// Encrtypt password before user is saved
-UserSchema.pre("save", async function (next) {
+// Encrtypt password before admin is saved
+AdminSchema.pre("save", async function (next) {
 	if (!this.isModified("password")) {
 		next();
 	}
@@ -44,18 +44,18 @@ UserSchema.pre("save", async function (next) {
 	next();
 });
 
-// Decrypts hashed password and compares with the password entered by user
-UserSchema.methods.matchPasswords = async function (password) {
+// Decrypts hashed password and compares with the password entered by admin
+AdminSchema.methods.matchPasswords = async function (password) {
 	return await bcrypt.compare(password, this.password);
 };
 
-// Creates a signed token with the user ID, JWT_SECRET and JWT_EXPIRE
-UserSchema.methods.getSignedToken = function () {
-	return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+// Creates a signed token with the admin ID, JWT_SECRET and JWT_EXPIRE
+AdminSchema.methods.getAdminToken = function () {
+	return jwt.sign({ id: this._id }, process.env.JWT_ADMIN_SECRET, {
 		expiresIn: process.env.JWT_EXPIRE,
 	});
 };
 
-const User = mongoose.model("user", UserSchema);
+const Admin = mongoose.model("admin", AdminSchema);
 
-module.exports = User;
+module.exports = Admin;

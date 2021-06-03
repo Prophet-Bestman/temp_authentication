@@ -1,8 +1,23 @@
-const { reflect } = require("async");
+// const { reflect } = require("async");
 const User = require("../models/User");
+const Admin = require("../models/Admin");
 // const Agent = require("../models/Agent");
 const ErrorResponse = require("../utils/errorResponse");
 
+exports.registerAdmin = async (req, res, next) => {
+	const { username, email, password, rank } = req.body;
+	try {
+		const admin = await Admin.create({
+			username,
+			email,
+			password,
+			rank,
+		});
+		sendAdminToken(admin, 201, res);
+	} catch (error) {
+		next(error);
+	}
+};
 exports.registerAgent = async (req, res, next) => {
 	const { username, email, password, rank } = req.body;
 	try {
@@ -12,7 +27,7 @@ exports.registerAgent = async (req, res, next) => {
 			password,
 			rank,
 		});
-		sendToken(user, 201, res);
+		sendUserToken(user, 201, res);
 	} catch (error) {
 		next(error);
 	}
@@ -27,7 +42,7 @@ exports.userSignUp = async (req, res, next) => {
 			password,
 			rank,
 		});
-		sendToken(user, 201, res);
+		sendUserToken(user, 201, res);
 	} catch (error) {
 		next(error);
 	}
@@ -50,7 +65,7 @@ exports.userSignIn = async (req, res, next) => {
 			return next(new ErrorResponse("Invalid Password", 401));
 		}
 
-		sendToken(user, 200, res);
+		sendUserToken(user, 200, res);
 	} catch (error) {
 		next(error);
 	}
@@ -96,8 +111,17 @@ exports.removeAgent = (req, res, next) => {
 	res.send("Remove Agent Route");
 };
 
-const sendToken = (user, statusCode, res) => {
+// Send user  and admin tokens
+const sendUserToken = (user, statusCode, res) => {
 	const token = user.getSignedToken();
+	res.status(statusCode).json({
+		success: true,
+		token,
+	});
+};
+
+const sendAdminToken = (admin, statusCode, res) => {
+	const token = admin.getAdminToken();
 	res.status(statusCode).json({
 		success: true,
 		token,

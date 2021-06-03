@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {
 	registerAgent,
+	registerAdmin,
 	userSignUp,
 	userSignIn,
 	ConfirmEmail,
@@ -17,6 +18,7 @@ const {
 } = require("../controllers/auth");
 
 router.route("/Agent/register").post(registerAgent);
+router.route("/Admin/register").post(registerAdmin);
 router.route("/User/signup").post(userSignUp);
 router.route("/User/signin").post(userSignIn);
 router.route("/User/confirmEmail").post(ConfirmEmail);
