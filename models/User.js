@@ -1,3 +1,4 @@
+const crypto = require('crypto')
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -22,11 +23,15 @@ const UserSchema = new mongoose.Schema({
 		minLength: 6,
 		select: false,
 	},
+	confirmEmailToken: String,
+	confirmTokenExpire: Date,
 	resetPasswordToken: String,
 	resetPasswordExpire: Date,
+	
+	isVerified: false,
 	rank: {
 		type: String,
-		required: [true, "Provide a username"],
+		required: [true, "Provide a rank"],
 	},
 });
 
@@ -55,6 +60,30 @@ UserSchema.methods.getSignedToken = function () {
 		expiresIn: process.env.JWT_EXPIRE,
 	});
 };
+
+// Hashed token generation for forgot passwords
+UserSchema.methods.getResetPasswordToken = function() {
+	const resetToken = crypto.randomBytes(20).toString("hex");
+
+	this.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+	this.resetPasswordExpire = Date.now() + 10 * (60 * 1000);
+
+	return resetToken; 
+}
+
+
+// Hashed token generation for eamil confirmation
+UserSchema.methods.getConfirmToken = function() {
+	const confirmToken = crypto.randomBytes(20).toString("hex");
+
+	this.confirmEmailToken = crypto.createHash("sha256").update(confirmToken).digest("hex");
+
+	this.confirmTokenExpire = Date.now() + 30 * (60 * 1000);
+
+	return confirmToken;
+	
+}
 
 const User = mongoose.model("user", UserSchema);
 

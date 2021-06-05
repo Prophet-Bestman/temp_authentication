@@ -1,6 +1,6 @@
 require("dotenv").config({ path: "./config.env" });
 const express = require("express");
-const cors = require("cors");
+// const cors = require("cors");
 const mongoose = require("mongoose");
 const errorHandler = require("./middlewares/error");
 
@@ -36,13 +36,3 @@ app.use("/api/private/", require("./routes/private"));
 
 // Error Handler (Has to be last piece of middleware)
 app.use(errorHandler);
-
-app.get("/api/customers", cors(), (req, res) => {
-	const customers = [
-		{ id: 1, firstName: "John", lastName: "Doe" },
-		{ id: 2, firstName: "Brad", lastName: "Traversy" },
-		{ id: 3, firstName: "Mary", lastName: "Swanson" },
-	];
-
-	res.json(customers);
-});

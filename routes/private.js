@@ -5,14 +5,20 @@ const {
 	convertUserToAdmin,
 	convertUserToAgent,
 	getPrivateData,
+	updateAgent,
+	updateUser,
+	removeAgent
 } = require("../controllers/private");
 const { protect } = require("../middlewares/protect");
 const { protectAdmin } = require("../middlewares/protectAdmin");
 
 router.route("/").get(protect, getPrivateData);
 
-router.route("/User/details").get(protect, userDetails);
+router.route("/User/details/:id").get(protect, userDetails);
 router.route("/Admin/convertUser").get(protectAdmin, convertUserToAdmin);
-router.route("/Agent/convertUser").get(protectAdmin, convertUserToAgent);
+router.route("/Agent/convertUser/:id").patch(protectAdmin, convertUserToAgent);
+router.route("/Agent/remove/:id").delete(protectAdmin, removeAgent);
+router.route("/Agent/update/:id").patch(protect, updateAgent);
+router.route("/User/update/:id").patch(protect, updateUser);
 
 module.exports = router;
