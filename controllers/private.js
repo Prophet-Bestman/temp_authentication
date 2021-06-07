@@ -1,101 +1,93 @@
-let User = require('../models/User');
-let Admin = require('../models/Admin');
-ErrorResponse = require('../utils/errorResponse')
+let User = require("../models/User");
+let Admin = require("../models/Admin");
+const ErrorResponse = require("../utils/errorResponse");
 
 exports.getPrivateData = (req, res, next) => {
-	res.status(200).json({
+	return res.status(200).json({
 		success: true,
 		data: "Access to page granted",
 	});
 };
 
-
-
 // User details
 exports.userDetails = async (req, res, next) => {
 	try {
 		const id = req.params.id;
-		User = await User.findById(id)
-		res.status(200).json({
+		User = await User.findById(id);
+		if (!User) {
+			return next(new ErrorResponse("User not found "), 404);
+		}
+		return res.status(200).json({
 			success: true,
-			User
-		})
-
+			User,
+		});
 	} catch (error) {
-		return next(new ErrorResponse("Cannot Fetch  User", 400));
+		next(error);
 	}
 };
 
 // ADMIN ACCESSS ONLY
-exports.convertUserToAdmin = (req, res, next) => {
+exports.convertUserToAdmin = async (req, res, next) => {
 	res.status(204).json({
 		success: true,
 		data: "Access to page granted",
 	});
 };
 
-
 // Convert User to Agent
 exports.convertUserToAgent = async (req, res, next) => {
 	try {
 		const id = req.params.id;
-		const   updates = req.body;
-		console.log(updates)
-		const options = {new: true, useFindAndModify: false};
+		const updates = req.body;
+		console.log(updates);
+		const options = { new: true, useFindAndModify: false };
 		const Agent = await User.findByIdAndUpdate(id, updates, options);
-		res.status(204).json({
+		return res.status(204).json({
 			success: true,
-			Agent
+			Agent,
 		});
-
 	} catch (error) {
-		return next(new ErrorResponse("Cannot convert  User", 409));
+		next(error);
 	}
-	
 };
 
 // Update User Details
 exports.updateUser = async (req, res, next) => {
 	try {
 		const id = req.params.id;
-		const   updates = req.body;
-		console.log(updates)
-		const options = {new: true, useFindAndModify: false};
-		User = await User.findByIdAndUpdate(id, updates, options);
-		res.status(204).json({
+		const updates = req.body;
+		const options = { new: true, useFindAndModify: false };
+		const user = await User.findOneAndUpdate(id, updates, options);
+		if (!user) {
+			return next(new ErrorResponse("User not found"), 404);
+		}
+		res.status(201).json({
 			success: true,
-			User
+			user,
 		});
-
 	} catch (error) {
-		return next(new ErrorResponse("Cannot Update User", 409));
+		next(error);
 	}
-	// res.status(200).json({
-	// 	success: true,
-	// 	data: "User Updated",
-	// });
 };
 
 // Update Agent Details
 exports.updateAgent = async (req, res, next) => {
 	try {
 		const id = req.params.id;
-		const   updates = req.body;
-		console.log(updates)
-		const options = {new: true, useFindAndModify: false};
+		const updates = req.body;
+		const options = { new: true, useFindAndModify: false };
 		const Agent = await User.findByIdAndUpdate(id, updates, options);
-		res.status(204).json({
+		if (!Agent) {
+			return next(new ErrorResponse("User not found"), 404);
+		}
+		res.status(201).json({
 			success: true,
-			Agent
+			data: "Agent Updated",
+			Agent,
 		});
-
 	} catch (error) {
-		return next(new ErrorResponse("Cannot convert Agent", 409));
+		next(error);
 	}
-	// res.status(200).json({
-	// 	success: true,
-	// 	data: "Agent Updated",
-	// });
 };
 
 // Delete an Agent
@@ -104,14 +96,13 @@ exports.removeAgent = async (req, res, next) => {
 		const id = req.params.id;
 		// const   updates = req.body;
 		// console.log(updates)
-		const options = { useFindAndModify: false};
+		const options = { useFindAndModify: false };
 		const RemovedAgent = await User.findByIdAndDelete(id, options);
-		res.status(204).json({
+		res.status(201).json({
 			success: true,
 			RemovedAgent,
-			data: "Agent Removed"
+			data: "Agent Removed",
 		});
-
 	} catch (error) {
 		return next(new ErrorResponse("Cannot delete Agent", 409));
 	}
@@ -126,19 +117,40 @@ exports.removeAdmin = async (req, res, next) => {
 		const id = req.params.id;
 		// const   updates = req.body;
 		// console.log(updates)
-		const options = { useFindAndModify: false};
+		const options = { useFindAndModify: false };
 		const RemovedAdmin = await Admin.findByIdAndDelete(id, options);
-		res.status(204).json({
+		res.status(201).json({
 			success: true,
 			RemovedAdmin,
-			data: "Admin Removed"
+			data: "Admin Removed",
 		});
-
 	} catch (error) {
-		return next(new ErrorResponse("Cannot delete Admin", 409));
+		next(error);
 	}
 	// res.status(200).json({
 	// 	success: true,
 	// 	data: "Agent Updated",
 	// });
+};
+
+exports.changePassword = async (req, res, next) => {
+	try {
+		const id = req.params.id;
+		const updates = req.body.password;
+		const options = { new: true };
+		const user = await User.findById(id);
+		if (!user) {
+			return next(new ErrorResponse("User Not found in database"), 404);
+		}
+		user.password = updates;
+
+		await user.save();
+		res.status(201).json({
+			success: true,
+			data: "User Password Changed",
+			user,
+		});
+	} catch (error) {
+		next(error);
+	}
 };
