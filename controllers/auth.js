@@ -6,16 +6,32 @@ const ErrorResponse = require("../utils/errorResponse");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");
 
-exports.registerAdmin = async (req, res, next) => {
-	const { username, email, password, rank } = req.body;
+exports.registerSuperAdmin = async (req, res, next) => {
+	const { username, email, password } = req.body;
 	try {
-		const admin = await Admin.create({
+		const superAdmin = await User.create({
 			username,
 			email,
 			password,
-			rank,
+			rank: "admin",
+			isSuper: true,
 		});
-		sendAdminToken(admin, 201, res);
+		sendUserToken(superAdmin, 201, res);
+	} catch (error) {
+		next(error);
+	}
+};
+exports.registerAdmin = async (req, res, next) => {
+	const { username, email, password } = req.body;
+	try {
+		const admin = await User.create({
+			username,
+			email,
+			password,
+			rank: "admin",
+			isSuper: true,
+		});
+		sendUserToken(admin, 201, res);
 	} catch (error) {
 		next(error);
 	}
@@ -45,13 +61,13 @@ exports.adminSignIn = async (req, res, next) => {
 };
 
 exports.registerAgent = async (req, res, next) => {
-	const { username, email, password, rank } = req.body;
+	const { username, email, password } = req.body;
 	try {
 		const user = await User.create({
 			username,
 			email,
 			password,
-			rank,
+			rank: "agent",
 		});
 		sendUserToken(user, 201, res);
 	} catch (error) {
@@ -60,13 +76,13 @@ exports.registerAgent = async (req, res, next) => {
 };
 
 exports.userSignUp = async (req, res, next) => {
-	const { username, email, password, rank } = req.body;
+	const { username, email, password } = req.body;
 	try {
 		const user = await User.create({
 			username,
 			email,
 			password,
-			rank,
+			rank: "user",
 		});
 		sendUserToken(user, 201, res);
 	} catch (error) {
@@ -210,12 +226,13 @@ exports.phonePasswordReset = (req, res, next) => {
 
 // Send Reset Link to Email
 exports.resetPasswordLink = async (req, res, next) => {
+	3;
 	const { email } = req.body;
 	try {
 		const user = await User.findOne({ email });
 		console.log(user);
 		if (!user) {
-			return next(new ErrorResponse("Couln't get this email"), 404);
+			return next(new ErrorResponse("Couldn't get this email"), 404);
 		}
 		const resetToken = user.getResetPasswordToken();
 
@@ -259,13 +276,6 @@ const sendUserToken = (user, statusCode, res) => {
 	res.status(statusCode).json({
 		success: true,
 		token,
-	});
-};
-
-const sendAdminToken = (admin, statusCode, res) => {
-	const token = admin.getAdminToken();
-	res.status(statusCode).json({
-		success: true,
-		token,
+		user,
 	});
 };

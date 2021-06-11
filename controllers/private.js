@@ -1,5 +1,5 @@
 let User = require("../models/User");
-let Admin = require("../models/Admin");
+// let Admin = require("../models/Admin");
 const ErrorResponse = require("../utils/errorResponse");
 
 exports.getPrivateData = (req, res, next) => {
@@ -28,22 +28,43 @@ exports.userDetails = async (req, res, next) => {
 
 // ADMIN ACCESSS ONLY
 exports.convertUserToAdmin = async (req, res, next) => {
-	res.status(204).json({
-		success: true,
-		data: "Access to page granted",
-	});
+	try {
+		const id = req.params.id;
+		const updates = { rank: "admin" };
+		console.log(updates);
+		const options = { new: true, useFindAndModify: false };
+		let Admin = await User.findById(id);
+		if (!Admin) {
+			return next(new ErrorResponse("User not located"));
+		}
+		Agent = await User.findByIdAndUpdate(id, updates, options);
+		console.log(Admin);
+		return res.status(201).json({
+			success: true,
+			data: "Successfully converted  user to Admin",
+			Admin,
+		});
+	} catch (error) {
+		next(error);
+	}
 };
 
 // Convert User to Agent
 exports.convertUserToAgent = async (req, res, next) => {
 	try {
 		const id = req.params.id;
-		const updates = req.body;
+		const updates = { rank: "agent" };
 		console.log(updates);
 		const options = { new: true, useFindAndModify: false };
-		const Agent = await User.findByIdAndUpdate(id, updates, options);
-		return res.status(204).json({
+		let Agent = await User.findById(id);
+		if (!Agent) {
+			return next(new ErrorResponse("User Cannot be located"));
+		}
+		Agent = await User.findByIdAndUpdate(id, updates, options);
+		console.log(Agent);
+		return res.status(201).json({
 			success: true,
+			data: "Successfully converted  user to Agent",
 			Agent,
 		});
 	} catch (error) {
@@ -97,20 +118,26 @@ exports.removeAgent = async (req, res, next) => {
 		// const   updates = req.body;
 		// console.log(updates)
 		const options = { useFindAndModify: false };
-		const RemovedAgent = await User.findByIdAndDelete(id, options);
+		let removedAgent = await User.findById(id);
+		if (!removedAgent) {
+			return next(new ErrorResponse("User not Located"), 404);
+		}
+
+		if (removedAgent.rank !== "agent") {
+			return next(new ErrorResponse("This user is not agent"), 400);
+		}
+		removedAgent = await User.findByIdAndDelete(id, options);
+
 		res.status(201).json({
 			success: true,
-			RemovedAgent,
+			removedAgent,
 			data: "Agent Removed",
 		});
 	} catch (error) {
 		return next(new ErrorResponse("Cannot delete Agent", 409));
 	}
-	// res.status(200).json({
-	// 	success: true,
-	// 	data: "Agent Updated",
-	// });
 };
+
 // Delete an Admin
 exports.removeAdmin = async (req, res, next) => {
 	try {
@@ -118,19 +145,24 @@ exports.removeAdmin = async (req, res, next) => {
 		// const   updates = req.body;
 		// console.log(updates)
 		const options = { useFindAndModify: false };
-		const RemovedAdmin = await Admin.findByIdAndDelete(id, options);
+		let removedAdmin = await User.findById(id);
+		if (!removedAdmin) {
+			return next(new ErrorResponse("User not Located"), 404);
+		}
+
+		if (removedAdmin.rank !== "admin") {
+			return next(new ErrorResponse("This user is not admin"), 400);
+		}
+		removedAdmin = await User.findByIdAndDelete(id, options);
+
 		res.status(201).json({
 			success: true,
-			RemovedAdmin,
+			removedAdmin,
 			data: "Admin Removed",
 		});
 	} catch (error) {
 		next(error);
 	}
-	// res.status(200).json({
-	// 	success: true,
-	// 	data: "Agent Updated",
-	// });
 };
 
 exports.changePassword = async (req, res, next) => {

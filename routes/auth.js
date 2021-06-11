@@ -3,6 +3,7 @@ const router = express.Router();
 const {
 	registerAgent,
 	registerAdmin,
+	registerSuperAdmin,
 	userSignUp,
 	userSignIn,
 	ConfirmEmail,
@@ -14,6 +15,7 @@ const {
 
 router.route("/Agent/register").post(registerAgent); //Done
 router.route("/Admin/register").post(registerAdmin); //Done
+router.route("/superAdmin/register").post(registerSuperAdmin); //Done
 router.route("/Admin/signin").post(userSignIn); //Done
 router.route("/User/signup").post(userSignUp); //Done
 router.route("/User/signin").post(userSignIn); //DOne
