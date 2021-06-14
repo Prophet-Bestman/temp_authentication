@@ -1,4 +1,5 @@
 const express = require("express");
+const passport = require('passport')
 const router = express.Router();
 const {
 	registerAgent,
@@ -13,6 +14,13 @@ const {
 	resetPasswordLink,
 } = require("../controllers/auth");
 
+
+router.get('/google', passport.authenticate('google', {
+	scope: ['email', 'profile']
+}))
+// router.get( '/auth/google/redirect', (req, res) => {
+// 	res.send("You have reached the callback route")
+// });
 router.route("/Agent/register").post(registerAgent); //Done
 router.route("/Admin/register").post(registerAdmin); //Done
 router.route("/superAdmin/register").post(registerSuperAdmin); //Done

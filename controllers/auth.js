@@ -1,7 +1,5 @@
 // const { reflect } = require("async");
 const User = require("../models/User");
-const Admin = require("../models/Admin");
-// const Agent = require("../models/Agent");
 const ErrorResponse = require("../utils/errorResponse");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");

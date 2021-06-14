@@ -3,6 +3,7 @@ const express = require("express");
 // const cors = require("cors");
 const mongoose = require("mongoose");
 const errorHandler = require("./middlewares/error");
+const passportSetpup = require('./config/passport-setup')
 
 // Express app
 const app = express();
